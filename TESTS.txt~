@@ -1,0 +1,98 @@
+
+
+
+javac baseline/*.java
+
+
+amazon0601
+============
+java -Xmx512M utils.CompleteEdges amazon0601.txt
+
+sort -k 1n,2n amazon0601.txt_COMPLEMENTED > test1.txt
+
+uniq test1.txt test2.txt
+
+Total output files = 53; total nodes in the graph=403394; max node degree is 2752
+Total core-1 nodes:12456
+Total core-2 nodes:18106
+Total core-3 nodes:18956
+Total core-4 nodes:17986
+Total core-5 nodes:17144
+Total core-6 nodes:19850
+Total core-7 nodes:34632
+Total core-8 nodes:124870
+Total core-9 nodes:106508
+Total core-10 nodes:32886
+
+
+/usr/bin/time java -Xmx1024M baseline.BottomUpAlgorithm test2.txt
+
+Command being timed: "java -Xmx1024M baseline.BottomUpAlgorithm test2.txt"
+	User time (seconds): 99.51
+	System time (seconds): 4.63
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:37.71
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 424172
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 34194
+	Voluntary context switches: 17125
+	Involuntary context switches: 40256
+	Swaps: 0
+	File system inputs: 264
+	File system outputs: 5814304
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+
+Total core-10 nodes:32886
+Total core-9 nodes:106508
+Total core-8 nodes:124870
+Total core-7 nodes:34632
+Total core-6 nodes:19850
+Total core-5 nodes:17144
+Total core-4 nodes:17986
+Total core-3 nodes:18956
+Total core-2 nodes:18106
+00
+/usr/bin/time java -Xmx1024M baseline.TopDownAlgorithm test2.txt
+Command being timed: "java -Xmx1024M baseline.TopDownAlgorithm test2.txt"
+	User time (seconds): 3103.71
+	System time (seconds): 140.83
+	Percent of CPU this job got: 105%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 51:21.87
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 574108
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 385354
+	Voluntary context switches: 561877
+	Involuntary context switches: 1106966
+	Swaps: 0
+	File system inputs: 11720
+	File system outputs: 196372440
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+
+/usr/bin/time java -Xmx2G emcore.EMCore test2.txt
+Too many files - updated block size to 102400 elements
+Total lines processed = 4886816
+Total nodes in the graph = 403394
+Total files on disk = 526
+Total tightened UBCore = 248028
+max UBCore = 315
+
+
+
