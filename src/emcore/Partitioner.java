@@ -6,6 +6,7 @@ import utils.*;
 
 public class Partitioner {
 	
+	private long totalLineWrites = 0;
 	private int maxDegree =0;
 	private BufferedReader reader;
 	private String delimiter;
@@ -21,7 +22,7 @@ public class Partitioner {
 	private int runningBucketID;
 	private int currentBucketFileID;
 	
-	private int totalNumberOfFolders = 0;
+	private int currentFolderID = 0;
 	
 	private long msTimeBound;
 	private boolean tightenUB = false;
@@ -59,15 +60,25 @@ public class Partitioner {
 		
 		buckets = new ArrayList <Bucket>();
 		
-		if (EMCore.printAnalysisMessages)
+		if (EMCoreIntervals.printAnalysisMessages)
 			degreeCounts = new HashMap <Integer,Integer> () ;
 		return true;
 	}
 	
+	public long getTotalReads()
+	{
+		return totalLineWrites;
+	}
+	
+	public long getTotalWrites()
+	{
+		return totalLineWrites;
+	}
 	public int getMaxDegree ()
 	{
 		return this.maxDegree;
 	}
+	
 	public int getTotalFilesLastFolder ()
 	{
 		return currentBucketFileID;
@@ -75,8 +86,9 @@ public class Partitioner {
 	
 	public int getTotalFolders ()
 	{
-		return this.totalNumberOfFolders;
+		return this.currentFolderID +1;
 	}
+	
 	public int getMaxUBCore ()
 	{
 		return this.maxCore;
@@ -131,7 +143,7 @@ public class Partitioner {
 							
 							vertexToBucket.put(currentVertex.getID(), bestBucketID);
 							totalAdded++;
-							if ( totalAdded % EMCore.msgEachNode == 0)
+							if (EMCoreIntervals.printDebugMessages && totalAdded % EMCoreIntervals.msgEachNode == 0)
 								System.out.println("Added vertex "+totalAdded);
 							this.totalNodes += (1+currentVertex.getDegree());						
 						}
@@ -140,7 +152,7 @@ public class Partitioner {
 					}
 					currentVertex.addAdjVertex(childVertexID);
 					lineID++;
-					if (EMCore.printDebugMessages && lineID % 1000000 == 0)
+					if (EMCoreIntervals.printDebugMessages && lineID % 1000000 == 0)
 						System.out.println("Processed line "+lineID);
 				}
 			}
@@ -185,12 +197,12 @@ public class Partitioner {
 				else 
 				{					
 					collectUBCounts (combinedBucket);
-					if (this.currentBucketFileID > EMCore.maxFilesPerFolder)
+					if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 					{
-						this.totalNumberOfFolders++;
+						this.currentFolderID++;
 						this.currentBucketFileID =0;
 					}
-					combinedBucket.flushReset(this.totalNumberOfFolders,this.currentBucketFileID++);
+					combinedBucket.flushReset(this.currentFolderID,this.currentBucketFileID++);
 					
 					
 					combinedBucket.setNewBucketID(this.runningBucketID++);
@@ -203,36 +215,42 @@ public class Partitioner {
 			else
 			{
 				collectUBCounts (this.buckets.get(i));
-		    	if (this.currentBucketFileID > EMCore.maxFilesPerFolder)
+		    	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 				{
-					this.totalNumberOfFolders++;
+					this.currentFolderID++;
 					this.currentBucketFileID =0;
 				}
-				this.buckets.get(i).flushReset(totalNumberOfFolders,this.currentBucketFileID++);					
+				this.buckets.get(i).flushReset(currentFolderID,this.currentBucketFileID++);					
 			}
 		}
 		
 		if (combinedBucket != null && combinedBucket.getTotalNodesCount()>0)
 		{			
 	    	collectUBCounts (combinedBucket);
-	    	if (this.currentBucketFileID > EMCore.maxFilesPerFolder)
+	    	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 			{
-				this.totalNumberOfFolders++;
+				this.currentFolderID++;
 				this.currentBucketFileID = 0;
 			}
-			combinedBucket.flushReset(this.totalNumberOfFolders,this.currentBucketFileID++);			
+			combinedBucket.flushReset(this.currentFolderID,this.currentBucketFileID++);			
 		}
-		if (EMCore.printDebugMessages) System.out.println("Total lines processed = "+lineID);
-		if (EMCore.printDebugMessages) System.out.println("Total nodes in the graph = "+totalAdded);
 		
-		System.out.println("Max vertex degree = "+this.maxDegree);
-		System.out.println("Total tightened UBCore = "+this.totalTightenedCount);
-		System.out.println("max UBCore = "+this.maxCore);	
+		
+		if(EMCoreIntervals.printAnalysisMessages)
+		{
+			System.out.println("Total lines processed = "+lineID);
+			System.out.println("Total nodes in the graph = "+totalAdded);
+			System.out.println("Max vertex degree = "+this.maxDegree);
+			System.out.println("Total tightened UBCore = "+this.totalTightenedCount);
+			System.out.println("max UBCore = "+this.maxCore);	
+		}
 		return true;
 	}
 	
 	private void collectUBCounts (Bucket b)
 	{
+		if (EMCoreIntervals.printAnalysisMessages)
+			totalLineWrites+=(b.getTotalVertices());
 		for (int i=0; i< b.getTotalVertices(); i++)
 		{
 			int ubCoreClass = b.getVertexByPosition(i).getUBCore();			
@@ -243,7 +261,7 @@ public class Partitioner {
 				totalCountForThisClass = this.coreClassCounts.get(ubCoreClass) +1;
 			this.coreClassCounts.put(ubCoreClass, totalCountForThisClass);
 			
-			if (EMCore.printAnalysisMessages)
+			if (EMCoreIntervals.printAnalysisMessages)
 			{
 				int degree =  b.getVertexByPosition(i).getDegree();
 				int totalCountForThisDegree = 1;
@@ -337,12 +355,12 @@ public class Partitioner {
 		}
     	
     	collectUBCounts (this.buckets.get(mostFullBucketID));
-    	if (this.currentBucketFileID > EMCore.maxFilesPerFolder)
+    	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 		{
-			this.totalNumberOfFolders++;
+			this.currentFolderID++;
 			this.currentBucketFileID = 0;
 		}
-    	if (!this.buckets.get(mostFullBucketID).flushReset(this.totalNumberOfFolders,this.currentBucketFileID++))
+    	if (!this.buckets.get(mostFullBucketID).flushReset(this.currentFolderID,this.currentBucketFileID++))
 		
     	this.buckets.get(mostFullBucketID).setNewBucketID( this.runningBucketID++);
     	return mostFullBucketID;

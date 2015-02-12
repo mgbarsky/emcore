@@ -8,6 +8,8 @@ public class Vertex {
 	private int depositCount;
 	private int UBCore;  //estimated core - for the paper algorithm
 	
+	
+	
 	public Vertex (int id)
 	{
 		this.ID = id;
@@ -35,6 +37,8 @@ public class Vertex {
 	{
 		return this.depositCount;
 	}
+	
+	
 	
 	public void addAdjVertex (int adjID)
 	{
