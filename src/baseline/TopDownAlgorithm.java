@@ -3,6 +3,8 @@ package baseline;
 import java.io.*;
 import java.util.*;
 
+import emcore.EMCoreIntervals;
+
 import utils.*;
 
 public class TopDownAlgorithm {
@@ -27,6 +29,7 @@ public class TopDownAlgorithm {
 		if (args.length >2)
 			delimiter = args[2];
 		
+		long startTime = System.currentTimeMillis();
 		//first, rewrite the entire input as a set of vertices with adjacency lists
 		try
 		{
@@ -96,10 +99,10 @@ public class TopDownAlgorithm {
 					}
 					currentVertex.addAdjVertex(childVertexID);
 					
-					if (totalNodes % 10000 == 0)
+					if (EMCoreIntervals.printDebugMessages && totalNodes % 10000 == 0)
 						System.out.println("Added vertex "+totalNodes);
 					lineID++;
-					if (lineID % 100000 == 0)
+					if (EMCoreIntervals.printDebugMessages && lineID % 100000 == 0)
 						System.out.println("Processed line "+lineID);
 				}
 			}
@@ -122,7 +125,9 @@ public class TopDownAlgorithm {
 		while (!done && k>1)
 		{
 			done = iterate (totalOutputFiles, k--);			
-		}		
+		}	
+		
+		System.out.println("Total time for naive Top down algorithm "+(System.currentTimeMillis() - startTime)+" ms.");
 	}
 	
 	private static boolean iterate (int totalFiles,int k)
@@ -232,7 +237,8 @@ public class TopDownAlgorithm {
 		}
 		
 		//done refining, this is the final group of core-k class
-		System.out.println("Total core-"+k +" nodes:"+candidateKeys.keySet().size());
+		if (EMCoreIntervals.printDebugMessages || candidateKeys.keySet().size() >0)
+			System.out.println("Total core-"+k +" nodes:"+candidateKeys.keySet().size());
 		
 		//now we need to iterate over input files again, and - remove all nodes with degree k, 
 		//and remove all adjacent vertices  that correspond to these nodes, depositing one token per removed node - top down - to know
@@ -369,7 +375,7 @@ public class TopDownAlgorithm {
 	{		
 		String fileName = Utils.TEMP_FOLDER +System.getProperty("file.separator") + Utils.BLOCK_FILE_PREFIX + currentFileID;
 		Collections.sort(buffer, new DegreeComparator(false)); //sorts in DESCENDING  order of degrees -top-down computation
-		if (debug)
+		if (EMCoreIntervals.printDebugMessages)
 			System.out.println(buffer);
 		BufferedWriter writer = null;
 		try 

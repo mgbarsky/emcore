@@ -3,6 +3,8 @@ import java.io.*;
 
 import java.util.*;
 
+import emcore.EMCoreIntervals;
+
 import utils.*;
 
 /**
@@ -47,6 +49,7 @@ public class BottomUpAlgorithm {
 		if (args.length >2)
 			delimiter = args[2];
 		
+		long startTime = System.currentTimeMillis();		
 		//first, rewrite the entire input as a set of vertices with adjacency lists
 		//and break the input into small files with at most MAX_ELEMENTS total vertices IDs
 		try
@@ -117,10 +120,10 @@ public class BottomUpAlgorithm {
 					}
 					currentVertex.addAdjVertex(childVertexID);
 					
-					if (totalNodes % 10000 == 0)
+					if (EMCoreIntervals.printDebugMessages && totalNodes % 10000 == 0)
 						System.out.println("Added vertex "+totalNodes);
 					lineID++;
-					if (lineID % 100000 == 0)
+					if (EMCoreIntervals.printDebugMessages && lineID % 100000 == 0)
 						System.out.println("Processed line "+lineID);
 				}
 			}
@@ -143,7 +146,9 @@ public class BottomUpAlgorithm {
 		while (!done)
 		{
 			done = iterate (totalOutputFiles, k++);			
-		}		
+		}
+		
+		System.out.println("Total time for naive Bottom up algorithm "+(System.currentTimeMillis() - startTime)+" ms.");
 	}
 	
 	private static boolean iterate (int totalFiles,int k)
