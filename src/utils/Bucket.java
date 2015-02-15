@@ -13,8 +13,7 @@ public class Bucket {
 	int bucketID;
 	int bucketPlaceInArray;
 	
-	private int tightenedUBCoreCount;
-	//private int maxUBcore = 0;
+	private int tightenedUBCoreCount;	
 	
 	
 	public Bucket (int placeInArray, int bucketID)
