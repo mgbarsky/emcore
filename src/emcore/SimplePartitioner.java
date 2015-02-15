@@ -14,15 +14,13 @@ import utils.*;
 
 public class SimplePartitioner implements PartitionerInterface {
 	
-	private long totalLineWrites = 0;
+	//private long totalLineWrites = 0;
 	private int maxDegree =0;
 	private BufferedReader reader;
 	private String delimiter;
 	
 	private int maxTotalNodes;
-	private int maxBucketSize;
-	
-	private int minBucketSize;
+
 	private int totalNodes;
 	
 	private Bucket bucket;
@@ -56,8 +54,8 @@ public class SimplePartitioner implements PartitionerInterface {
 		
 		bucket = new Bucket (0, 0);
 		
-		if (EMCoreIntervals.printAnalysisMessages)
-			degreeCounts = new HashMap <Integer,Integer> () ;
+		//if (EMCoreIntervals.printAnalysisMessages)
+		//	degreeCounts = new HashMap <Integer,Integer> () ;
 		return true;
 	}
 	
@@ -73,12 +71,12 @@ public class SimplePartitioner implements PartitionerInterface {
 	
 	public long getTotalReads()
 	{
-		return totalLineWrites;
+		return 0;
 	}
 	
 	public long getTotalWrites()
 	{
-		return totalLineWrites;
+		return 0;
 	}
 	
 	public int getMaxDegree ()
@@ -138,9 +136,14 @@ public class SimplePartitioner implements PartitionerInterface {
 							currentVertex.setUBCore(currentVertex.getDegree());
 							bucket.addVertex(currentVertex);
 							
-							if(currentVertex.getDegree() > maxDegree)
-								maxDegree = currentVertex.getDegree();
-							
+							int degree = currentVertex.getDegree();
+							if(degree > maxDegree)
+								maxDegree = degree;
+							int totalCountForThisClass = 1;
+							if (this.coreClassCounts.containsKey(degree))
+								totalCountForThisClass = this.coreClassCounts.get(degree) +1;
+							this.coreClassCounts.put(degree, totalCountForThisClass);
+														
 							totalAdded++;
 							if (EMCoreIntervals.printDebugMessages && totalAdded % EMCoreIntervals.msgEachNode == 0)
 								System.out.println("Added vertex "+totalAdded);
@@ -149,8 +152,7 @@ public class SimplePartitioner implements PartitionerInterface {
 							//now check if need to empty bucket
 							if (bucket.getTotalNodesCount() > maxTotalNodes)
 							{
-								collectUBCounts (bucket);
-						    	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
+								if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 								{
 									this.currentFolderID++;
 									this.currentBucketFileID = 0;
@@ -178,13 +180,17 @@ public class SimplePartitioner implements PartitionerInterface {
 		//add the last vertex
 		currentVertex.setUBCore(currentVertex.getDegree());
 		bucket.addVertex(currentVertex);
-		if(currentVertex.getDegree() > maxDegree)
-			maxDegree = currentVertex.getDegree();
-		
+		int degree = currentVertex.getDegree();
+		if(degree > maxDegree)
+			maxDegree = degree;
+		int totalCountForThisClass = 1;
+		if (this.coreClassCounts.containsKey(degree))
+			totalCountForThisClass = this.coreClassCounts.get(degree) +1;
+		this.coreClassCounts.put(degree, totalCountForThisClass);
 		totalAdded++;
 		
 		//empty last bucket
-		collectUBCounts (bucket);
+		
     	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 		{
 			this.currentFolderID++;
@@ -203,29 +209,6 @@ public class SimplePartitioner implements PartitionerInterface {
 		return true;
 	}
 	
-	private void collectUBCounts (Bucket b)
-	{
-		if (EMCoreIntervals.printAnalysisMessages)
-			totalLineWrites+=(b.getTotalVertices());
-		for (int i=0; i< b.getTotalVertices(); i++)
-		{
-			int ubCoreClass = b.getVertexByPosition(i).getUBCore();			
-	    	
-			int totalCountForThisClass = 1;
-			if (this.coreClassCounts.containsKey(ubCoreClass))
-				totalCountForThisClass = this.coreClassCounts.get(ubCoreClass) +1;
-			this.coreClassCounts.put(ubCoreClass, totalCountForThisClass);
-			
-			if (EMCoreIntervals.printAnalysisMessages)
-			{
-
-				int degree =  b.getVertexByPosition(i).getDegree();
-				int totalCountForThisDegree = 1;
-				if(	degreeCounts.containsKey(degree))
-					totalCountForThisDegree += degreeCounts.get(degree);
-				degreeCounts.put(degree, totalCountForThisDegree);
-			}
-		}
-	}
+	
   
 }

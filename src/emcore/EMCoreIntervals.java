@@ -97,22 +97,22 @@ public class EMCoreIntervals {
 		int maxDegree = p.getMaxDegree();
 		
 		Map <Integer,Integer> coreClassCounts = p.getCoreClassCounts();
-		if (printAnalysisMessages)
-		{
-			System.out.println (getSortedmapString(p.getDegreeCounts(), maxDegree) );
-			System.out.println (getSortedmapString(coreClassCounts, maxK) );			
-		}
+		//if (printAnalysisMessages)
+		//{
+		//	System.out.println (getSortedmapString(p.getDegreeCounts(), maxDegree) );
+		//	System.out.println (getSortedmapString(coreClassCounts, maxK) );			
+		//}
 		
-		if (printDebugMessages)
-		{
-			Iterator<Integer>it = coreClassCounts.values().iterator();
-			int totalCounts =0;
-			while(it.hasNext())
-			{
-				totalCounts += it.next();
-			}
-			System.out.println ("Total candidates count = "+totalCounts);
-		}
+		//if (printDebugMessages)
+		//{
+		//	Iterator<Integer>it = coreClassCounts.values().iterator();
+		//	int totalCounts =0;
+		//	while(it.hasNext())
+		//	{
+		//		totalCounts += it.next();
+		//	}
+		//	System.out.println ("Total candidates count = "+totalCounts);
+		//}
 		int totalBlocksInlastFolder =  p.getTotalFilesLastFolder();
 		int totalFolders = p.getTotalFolders();
 		

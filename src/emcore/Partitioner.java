@@ -341,38 +341,53 @@ public class Partitioner implements PartitionerInterface{
     	}  
     	
     	//cant place into existing buckets, and number of allowed buckets is exhausted
-    	//we need to flush one of the existing buckets - find which by finding the most full
-    	Collections.sort(this.buckets, new BucketsCountsComparator());
+    	//we need to flush existing buckets - as many as to about minBucketSize
+    	
+    	//Collections.sort(this.buckets, new BucketsCountsComparator());
     	//int mostNodes =this.buckets.get(0).getTotalNodesCount();
-    	int mostFullBucketID = this.buckets.get(0).getBucketPlaceInArray();
+    	//int mostFullBucketID = this.buckets.get(0).getBucketPlaceInArray();
     	
     	//restore original order
-    	Collections.sort(this.buckets, new BucketIDComparator());
+    	//Collections.sort(this.buckets, new BucketIDComparator());
     	    	
     	//now flush the most full bucket to free space
-    	this.totalNodes -= this.buckets.get(mostFullBucketID).getTotalNodesCount();
-    	if (this.tightenUB) this.buckets.get(mostFullBucketID).tightenUBCore(this.limitUBTightening,this.msTimeBound);
+    	int flushedCount =0;
+    	int lastBucketID = this.buckets.size()-1;
+    	Bucket combinedBucket = new Bucket (-1,this.runningBucketID++);
     	
-    	
-    	this.totalTightenedCount+=this.buckets.get(mostFullBucketID).getTightenedCount();
-    	
-    	//now we need to remove all references to this bucket from the mapping nodeid to bucketid position
-    	for (int j=0; j<this.buckets.get(mostFullBucketID).getTotalVertices(); j++)
-		{
-			int currVertexID = this.buckets.get(mostFullBucketID).getVertexByPosition(j).getID();
-			
-			this.vertexToBucket.remove(currVertexID);						
-		}
-    	
-    	collectUBCounts (this.buckets.get(mostFullBucketID));
+    	while (flushedCount < this.minBucketSize && lastBucketID >0)
+    	{    		
+    		this.totalNodes -= this.buckets.get(lastBucketID).getTotalNodesCount();
+    		flushedCount += this.buckets.get(lastBucketID).getTotalNodesCount();
+    		if (this.tightenUB) this.buckets.get(lastBucketID).tightenUBCore(this.limitUBTightening,this.msTimeBound);
+    		this.totalTightenedCount+=this.buckets.get(lastBucketID).getTightenedCount();
+    		
+    		//now we need to remove all references to this bucket from the mapping nodeid to bucketid position
+        	for (int j=0; j<this.buckets.get(lastBucketID).getTotalVertices(); j++)
+    		{
+    			int currVertexID = this.buckets.get(lastBucketID).getVertexByPosition(j).getID();    			
+    			this.vertexToBucket.remove(currVertexID);						
+    		}
+        	
+        	for (int k=0; k< this.buckets.get(lastBucketID).getTotalVertices(); k++)
+			{						
+				combinedBucket.addVertex (this.buckets.get(lastBucketID).getVertexByPosition(k));
+			}
+        	
+        	//this.buckets.get(mostFullBucketID).setNewBucketID( this.runningBucketID++);
+        	this.buckets.remove(lastBucketID);
+        	lastBucketID = this.buckets.size()-1;
+    	}
+        
+    	collectUBCounts (combinedBucket);
     	if (this.currentBucketFileID >= EMCoreIntervals.maxFilesPerFolder)
 		{
 			this.currentFolderID++;
 			this.currentBucketFileID = 0;
 		}
-    	if (!this.buckets.get(mostFullBucketID).flushReset(this.currentFolderID,this.currentBucketFileID++))
-    		System.exit(1);
-    	this.buckets.get(mostFullBucketID).setNewBucketID( this.runningBucketID++);
-    	return mostFullBucketID;
+		combinedBucket.flushReset(this.currentFolderID,this.currentBucketFileID++);	
+    	this.buckets.add(new Bucket(this.buckets.size() ,runningBucketID++));
+		return this.buckets.size() - 1;	
+    	
     }
 }

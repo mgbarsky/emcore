@@ -6,7 +6,8 @@ import java.util.*;
 import utils.*;
 
 public class TopDownAlgorithm {
-	static boolean debug = false;
+	static final boolean debug = false;
+	static long totalDiskReads = 0;
 	public static void main (String [] args)
 	{		
 		int MAX_ELEMENTS = 100000;
@@ -26,6 +27,8 @@ public class TopDownAlgorithm {
 		String delimiter = String.valueOf('\t');
 		if (args.length >2)
 			delimiter = args[2];
+		
+		long startTime = System.currentTimeMillis();
 		
 		//first, rewrite the entire input as a set of vertices with adjacency lists
 		try
@@ -115,6 +118,7 @@ public class TopDownAlgorithm {
 		}	
 		
 		System.out.println("Total output files = "+totalOutputFiles +"; total nodes in the graph="+totalNodes+"; max node degree is "+maxDegree);
+		System.out.println ("Total partitioning time = "+(System.currentTimeMillis() - startTime)+" ms.");
 		boolean done = false;
 		int k=maxDegree;
 		
@@ -122,7 +126,9 @@ public class TopDownAlgorithm {
 		while (!done && k>1)
 		{
 			done = iterate (totalOutputFiles, k--);			
-		}		
+		}
+		System.out.println ("Total time = "+(System.currentTimeMillis() - startTime)+" ms.");
+		System.out.println ("Total vertex disk reads="+totalDiskReads);
 	}
 	
 	private static boolean iterate (int totalFiles,int k)
@@ -136,8 +142,7 @@ public class TopDownAlgorithm {
 		Map <Integer, Object> candidateKeys = new HashMap <Integer, Object>();  //stores nodes identified as candidates for k-core
 		List <Vertex> candidates = new ArrayList <Vertex> (); //put everything here with degree + deposit >= k
 		//1. Collect all nodes with degree+deposit >= k first
-		if (k==4)
-			k=4;
+		
 		for (int i=0;i<totalFiles; i++)
 		{
 			boolean fileExists = true;
@@ -161,6 +166,7 @@ public class TopDownAlgorithm {
 					boolean done = false;
 					while ((line = reader.readLine()) != null &&  !done && !line.equals("")) 
 					{
+						totalDiskReads++;
 						Vertex v = Vertex.constructFromString (line);
 						if (v.getDegree()+v.getDepositCount() >= k)
 						{
@@ -184,7 +190,14 @@ public class TopDownAlgorithm {
 			}
 		}
 		
-		
+		if (candidates.size() < k)  //no chance of finding nodes of k-core class
+		{
+			System.out.println("Total core-"+k +" nodes: 0");
+			if (candidates.size()>0)
+				return false;
+			else
+				return true;
+		}
 		//now we need to refine candidates for the core class k, working with the sub-graph built in main memory
 		boolean doneRefining = false;
 		while (!doneRefining)
@@ -265,6 +278,7 @@ public class TopDownAlgorithm {
 					while ((line = reader.readLine()) != null &&   !line.equals("")) 
 					{
 						Vertex v = Vertex.constructFromString (line);
+						totalDiskReads++;
 						if (!candidateKeys.containsKey(v.getID())) //this node does not belong to the current k-core, and is written back to file
 						{
 							List <Integer>newAdjNodes = new ArrayList <Integer>(); //check if need to remove some of adjacent nodes

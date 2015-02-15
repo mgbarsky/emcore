@@ -26,7 +26,7 @@ import utils.*;
  **/
 
 public class BottomUpAlgorithm {
-
+	static long totalDiskReads = 0;
 	public static void main (String [] args)
 	{
 		int MAX_ELEMENTS = 100000;
@@ -47,6 +47,8 @@ public class BottomUpAlgorithm {
 		if (args.length >2)
 			delimiter = args[2];
 		
+		long startTime = System.currentTimeMillis();
+		
 		//first, rewrite the entire input as a set of vertices with adjacency lists
 		//and break the input into small files with at most MAX_ELEMENTS total vertices IDs
 		try
@@ -59,6 +61,7 @@ public class BottomUpAlgorithm {
 			System.out.println("Unexpected error when reading from File "+inputFileName +": "+ge.getMessage());
 			System.exit(1);
 		}
+		
 		
 		String line;
 		Vertex currentVertex =null;
@@ -117,10 +120,10 @@ public class BottomUpAlgorithm {
 					}
 					currentVertex.addAdjVertex(childVertexID);
 					
-					if (totalNodes % 10000 == 0)
+					if (totalNodes >0 && totalNodes % 1000000 == 0)
 						System.out.println("Added vertex "+totalNodes);
 					lineID++;
-					if (lineID % 100000 == 0)
+					if (lineID % 1000000 == 0)
 						System.out.println("Processed line "+lineID);
 				}
 			}
@@ -136,6 +139,8 @@ public class BottomUpAlgorithm {
 		}	
 		
 		System.out.println("Total output files = "+totalOutputFiles +"; total nodes in the graph="+totalNodes+"; max node degree is "+maxDegree);
+		System.out.println ("Total partitioning time = "+(System.currentTimeMillis() - startTime)+" ms.");
+		
 		boolean done = false;
 		int k=1;
 		
@@ -143,7 +148,11 @@ public class BottomUpAlgorithm {
 		while (!done)
 		{
 			done = iterate (totalOutputFiles, k++);			
-		}		
+		}	
+		
+		//
+		System.out.println ("Total time = "+(System.currentTimeMillis() - startTime)+" ms.");
+		System.out.println ("Total vertex disk reads="+totalDiskReads);
 	}
 	
 	private static boolean iterate (int totalFiles,int k)
@@ -181,6 +190,7 @@ public class BottomUpAlgorithm {
 					boolean done = false;
 					while ((line = reader.readLine()) != null &&  !done && !line.equals("")) 
 					{
+						totalDiskReads++;
 						String [] fields = line.split(Utils.FIELD_SEPARATOR);
 						int degree =0;
 						
@@ -244,6 +254,7 @@ public class BottomUpAlgorithm {
 					{				
 						while ((line = reader.readLine()) != null &&   !line.equals("")) 
 						{
+							totalDiskReads++;
 							Vertex v = Vertex.constructFromString (line);
 							if (!degreeKNodes.containsKey(v.getID()))
 							{
