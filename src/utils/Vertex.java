@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Vertex {
 	private int ID;
-	private List <Integer> adjVertices;
+	public List <Integer> adjVertices;
 	
 	private int depositCount;
 	private int UBCore;  //estimated core - for the paper algorithm

@@ -4,7 +4,7 @@ import utils.*;
 import java.util.*;
 
 public class EMCoreIntervals {
-	public static final boolean printDebugMessages = false;
+	public static final boolean printDebugMessages = true;
 	public static int msgEachNode = 10000;
 	public static int maxFilesPerFolder=512;
 	public static final boolean printAnalysisMessages=true;
@@ -84,12 +84,12 @@ public class EMCoreIntervals {
 			System.exit(1);
 		long endTime = System.currentTimeMillis();
 		if (printDebugMessages) System.out.println ("Total time for partitioning "+(endTime - startTime) +" ms.");
-		if (printAnalysisMessages)
-		{
-			System.out.println ("During partitioning Total line reads="+p.getTotalReads()+" total node writes="+p.getTotalWrites());
+		//if (printAnalysisMessages)
+		//{
+		//	System.out.println ("During partitioning Total line reads="+p.getTotalReads()+" total node writes="+p.getTotalWrites());
 			totalDiskReads+=p.getTotalReads();
 			totalDiskWrites+=p.getTotalWrites();
-		}
+		//}
 		
 		
 		startTime = System.currentTimeMillis();
@@ -117,7 +117,7 @@ public class EMCoreIntervals {
 		int totalFolders = p.getTotalFolders();
 		
 		if (printDebugMessages) System.out.println ("Total folders: "+totalFolders +"; total files in each folder: "
-				+EMCore.maxFilesPerFolder+"("+totalBlocksInlastFolder+" in the last folder).");
+				+EMCoreIntervals.maxFilesPerFolder+"("+totalBlocksInlastFolder+" in the last folder).");
 		int k=maxK;
 		
 		while (k>0)
@@ -185,7 +185,7 @@ public class EMCoreIntervals {
 		}
 		
 		endTime = System.currentTimeMillis();
-		System.out.println ("Total time for EMcore algorithm "+(endTime - startTime) +" ms.");
+		System.out.println ("Total time for EMcore Intervals algorithm "+(endTime - startTime) +" ms.");
 		if (printAnalysisMessages)
 			System.out.println("Total disk reads="+totalDiskReads+" total disk writes="+totalDiskWrites);
 	}

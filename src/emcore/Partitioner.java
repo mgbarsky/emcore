@@ -42,7 +42,7 @@ public class Partitioner implements PartitionerInterface{
 	
 	public boolean init (String inputFileName, char delimiterChar, 
 			int maxTotalNodes, int maxBucketSize, int minBucketSize)
-	{
+	{		 
 		this.delimiter = String.valueOf(delimiterChar);
 		this.maxTotalNodes = maxTotalNodes;
 		this.maxBucketSize = maxBucketSize;
@@ -162,7 +162,7 @@ public class Partitioner implements PartitionerInterface{
 					}
 					currentVertex.addAdjVertex(childVertexID);
 					lineID++;
-					if (EMCoreIntervals.printDebugMessages && lineID % 1000000 == 0)
+					if (EMCoreIntervals.printDebugMessages && lineID % 10000000 == 0)
 						System.out.println("Processed line "+lineID);
 				}
 			}
@@ -271,14 +271,14 @@ public class Partitioner implements PartitionerInterface{
 				totalCountForThisClass = this.coreClassCounts.get(ubCoreClass) +1;
 			this.coreClassCounts.put(ubCoreClass, totalCountForThisClass);
 			
-			if (EMCoreIntervals.printAnalysisMessages)
-			{
-				int degree =  b.getVertexByPosition(i).getDegree();
-				int totalCountForThisDegree = 1;
-				if(	degreeCounts.containsKey(degree))
-					totalCountForThisDegree += degreeCounts.get(degree);
-				degreeCounts.put(degree, totalCountForThisDegree);
-			}
+			//if (EMCoreIntervals.printAnalysisMessages)
+			//{
+			//	int degree =  b.getVertexByPosition(i).getDegree();
+			//	int totalCountForThisDegree = 1;
+			//	if(	degreeCounts.containsKey(degree))
+			//		totalCountForThisDegree += degreeCounts.get(degree);
+			//	degreeCounts.put(degree, totalCountForThisDegree);
+			//}
 		}
 	}
     private int getBestBucketID (Vertex v)
@@ -355,7 +355,7 @@ public class Partitioner implements PartitionerInterface{
     	int lastBucketID = this.buckets.size()-1;
     	Bucket combinedBucket = new Bucket (-1,this.runningBucketID++);
     	
-    	while (flushedCount < this.minBucketSize && lastBucketID >0)
+    	while (flushedCount < this.minBucketSize )
     	{    		
     		this.totalNodes -= this.buckets.get(lastBucketID).getTotalNodesCount();
     		flushedCount += this.buckets.get(lastBucketID).getTotalNodesCount();
@@ -387,7 +387,6 @@ public class Partitioner implements PartitionerInterface{
 		}
 		combinedBucket.flushReset(this.currentFolderID,this.currentBucketFileID++);	
     	this.buckets.add(new Bucket(this.buckets.size() ,runningBucketID++));
-		return this.buckets.size() - 1;	
-    	
+		return this.buckets.size() - 1;	    	
     }
 }

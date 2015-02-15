@@ -65,17 +65,21 @@ public class PartialGraph {
 		{
 			Vertex v = this.list.get(i);
 			int validCount =v.getDepositCount();
-			List <Integer>newAdjVertices = new ArrayList<Integer>();
-			for (int a = 0; a < v.getDegree(); a++) //counting how many edges from v in this subgraph
+			Iterator <Integer> aIter = v.adjVertices.iterator();
+			while (aIter.hasNext())
 			{
-				int adjID = v.getAdjvertexID(a);
+				int adjID = aIter.next();
+				
 				if (verticesDictionary.containsKey(adjID))
 				{
-					newAdjVertices.add(adjID);
 					validCount++;
-				}		
+				}
+				else
+				{
+					aIter.remove();
+				}
 			}
-			v.replaceAdjVertices(newAdjVertices);
+			
 			if (validCount  < k)
 			{
 				invalidIdsMap.put(v.getID(), null);
@@ -93,16 +97,18 @@ public class PartialGraph {
 			{
 				allInvalidRemoved = true;
 				int prevValidCount = this.list.size();
-				int prevInvalidCount = invalidIdsMap.keySet().size();
-				List <Vertex> newList = new ArrayList <Vertex> ();
-				for (int i=0; i< this.list.size(); i++)
+				
+				//List <Vertex> newList = new ArrayList <Vertex> ();
+				Iterator<Vertex> lIter = this.list.iterator();
+				while (lIter.hasNext())
 				{
-					Vertex v = this.list.get(i);
+					Vertex v = lIter.next();
 					
 					if (invalidIdsMap.containsKey(v.getID()))  //this vertex contains less than k children
 					{
 						allInvalidRemoved = false;
-						verticesDictionary.remove(v.getID());	//and dont add it to a new updated list of nodes						
+						verticesDictionary.remove(v.getID());	//and dont add it to a new updated list of nodes
+						lIter.remove();
 					}
 					else //this is valid vertex so far
 					{
@@ -116,25 +122,23 @@ public class PartialGraph {
 						else
 						{
 							//remove invalid children
-							List <Integer> newAdjVertices = new ArrayList <Integer>();
-							for (int a =0; a< v.getDegree(); a++)
+							Iterator<Integer> aIter = v.adjVertices.iterator();
+							while (aIter.hasNext())
 							{
-								int aID = v.getAdjvertexID(a);
-								if (!invalidIdsMap.containsKey(aID))
-									newAdjVertices.add(aID);
-								else
+								int aID =aIter.next();
+								if (invalidIdsMap.containsKey(aID))
+								{
 									allInvalidRemoved = false;
-							}
-							v.replaceAdjVertices(newAdjVertices);
-							newList.add(v);
+									aIter.remove();
+								}
+							}							
 						}						
 					}					
 				}
-				this.list = newList;
+				
 				
 				int validCount = this.list.size();
-				int invalidCount = invalidIdsMap.keySet().size();
-				
+								
 				if (validCount != prevValidCount)
 					allInvalidRemoved = false;
 			}
@@ -143,14 +147,15 @@ public class PartialGraph {
 		//2. Collect nodes with the lowest degree k, remove them from the verticesDictionary and from the list
 		//======================================
 		//now, all the remaining nodes are of at least k degree
-		//we are going in a loop now and collect degree k nodes
+		//we are going in a loop and collect degree k nodes
 		//then remove them from the graph, and collect all with degree <=k until no more changes
 		boolean allKcoreCollected = false;
 		while (!allKcoreCollected)
 		{
 			allKcoreCollected = true;
 			//now we are going through all remaining vertices and remove all with core class = k, adding them to coreClassDict
-			List <Vertex> newList = new ArrayList <Vertex> ();
+						
+			
 			for (int i=0; i< this.list.size(); i++)
 			{
 				Vertex v = this.list.get(i);
@@ -176,33 +181,32 @@ public class PartialGraph {
 			
 			
 			//now remove k-core nodes from partial graph, from list and from and adjacency lists of remaining nodes
-			newList = new ArrayList <Vertex> ();
-			for (int i=0; i< this.list.size(); i++)
+			Iterator <Vertex> lIter = this.list.iterator();
+			while (lIter.hasNext())
 			{
-				Vertex v = this.list.get(i);
+				Vertex v = lIter.next();
 				int vID = v.getID();
 				if (coreClassDict.containsKey(vID))
 				{
 					allKcoreCollected = false;
-					verticesDictionary.remove(v.getID());	
+					verticesDictionary.remove(v.getID());
+					lIter.remove();
 				}
 				//remove children of class k
 				else
 				{
-					List <Integer> newAdjVertices = new ArrayList <Integer>();
-					for (int a =0; a< v.getDegree(); a++)
+					Iterator <Integer> aIter = v.adjVertices.iterator();
+					while (aIter.hasNext())
 					{
-						int aID = v.getAdjvertexID(a);
-						if (!coreClassDict.containsKey(aID))
-							newAdjVertices.add(aID);
-						else
+						int aID =aIter.next();
+						if (coreClassDict.containsKey(aID))
+						{
 							allKcoreCollected = false;
-					}
-					v.replaceAdjVertices(newAdjVertices);
-					newList.add(v);	
+							aIter.remove();
+						}
+					}					
 				}
 			}
-			this.list = newList;
 		}		
 		
 		return coreClassDict;
