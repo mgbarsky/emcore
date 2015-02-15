@@ -1,6 +1,7 @@
 package emcore;
 
 import utils.*;
+
 import java.util.*;
 
 public class EMCore {
@@ -83,10 +84,12 @@ public class EMCore {
 		startTime = System.currentTimeMillis();
 		int maxK = p.getMaxUBCore(); //5
 		int maxDegree = p.getMaxDegree();
+		
+		Map <Integer,Integer> coreClassCounts = p.getCoreClassCounts();
 		if (printAnalysisMessages)
 		{
-			System.out.println (getSortedmapString(p.degreeCounts, maxDegree) );
-			System.out.println (getSortedmapString(p.coreClassCounts, maxK) );			
+			System.out.println (getSortedmapString(p.getDegreeCounts(), maxDegree) );
+			System.out.println (getSortedmapString(coreClassCounts, maxK) );			
 		}
 		int totalBlocksInlastFolder =  p.getTotalFilesLastFolder();
 		int totalFolders = p.getTotalFolders();
@@ -96,10 +99,10 @@ public class EMCore {
 		int k=maxK;
 		while (k>0)
 		{				
-			if (p.coreClassCounts.containsKey(k) )
+			if (coreClassCounts.containsKey(k) )
 			{
 				long sTime = System.currentTimeMillis();
-				int totalCandidateNodes = p.coreClassCounts.get(k);
+				int totalCandidateNodes = coreClassCounts.get(k);
 				
 				int nextlevelCounts = 0;
 				if (totalCandidateNodes >= k)
@@ -127,9 +130,9 @@ public class EMCore {
 				
 				if (nextlevelCounts >0)
 				{
-					if (p.coreClassCounts.containsKey(k-1))
-						nextlevelCounts += p.coreClassCounts.get(k-1);
-					p.coreClassCounts.put(k-1, nextlevelCounts);
+					if (coreClassCounts.containsKey(k-1))
+						nextlevelCounts += coreClassCounts.get(k-1);
+					coreClassCounts.put(k-1, nextlevelCounts);
 				}
 			}
 			k--;			

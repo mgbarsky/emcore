@@ -1,10 +1,10 @@
 package emcore;
 import java.util.*;
-
 import java.io.*;
+
 import utils.*;
 
-public class Partitioner {
+public class Partitioner implements PartitionerInterface{
 	
 	private long totalLineWrites = 0;
 	private int maxDegree =0;
@@ -36,9 +36,9 @@ public class Partitioner {
 	Map <Integer,Integer> vertexToBucket = new HashMap <Integer,Integer> () ;
 	
 	//this stores how many nodes are estimated for each core class
-	public Map <Integer,Integer> coreClassCounts = new HashMap <Integer,Integer> () ;
+	private Map <Integer,Integer> coreClassCounts = new HashMap <Integer,Integer> () ;
 	
-	public Map <Integer,Integer> degreeCounts ; 
+	private Map <Integer,Integer> degreeCounts ; 
 	
 	public boolean init (String inputFileName, char delimiterChar, 
 			int maxTotalNodes, int maxBucketSize, int minBucketSize)
@@ -63,6 +63,16 @@ public class Partitioner {
 		if (EMCoreIntervals.printAnalysisMessages)
 			degreeCounts = new HashMap <Integer,Integer> () ;
 		return true;
+	}
+	
+	public Map <Integer,Integer> getCoreClassCounts() 
+	{
+		return coreClassCounts;
+	}
+	
+	public Map <Integer,Integer> getDegreeCounts() 
+	{
+		return degreeCounts;
 	}
 	
 	public long getTotalReads()
@@ -361,7 +371,7 @@ public class Partitioner {
 			this.currentBucketFileID = 0;
 		}
     	if (!this.buckets.get(mostFullBucketID).flushReset(this.currentFolderID,this.currentBucketFileID++))
-		
+    		System.exit(1);
     	this.buckets.get(mostFullBucketID).setNewBucketID( this.runningBucketID++);
     	return mostFullBucketID;
     }
