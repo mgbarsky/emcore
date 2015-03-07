@@ -4,7 +4,7 @@ This is a Java implementation of the "EM core" algorithm, according to the descr
 Cheng, J.; Yiping Ke; Shumo Chu; Ozsu, M.T., "Efficient core decomposition in massive networks," Data Engineering (ICDE), 2011 IEEE 27th International Conference on , vol., no., pp.51,62, 11-16 April 2011. 
 URL: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5767911&isnumber=5767827
 
-The implementation is aimed for the k-core decomposition of very large graphs, by breaking the input graph into small files and keeping in memory only the nodes of the current k-core class, updating the remaining disk-based partitions.
+The implementation is aimed at the k-core decomposition of very large graphs, by breaking the input graph into small files and keeping in memory only the nodes of the current k-core class, updating the remaining disk-based partitions.
 
 Before running the program, make two folders in a current directory: <em>temp</em> and <em>results</em>.
 Intermediate partitioned input is written into the <em>temp</em> directory, and the final k-core classes are written into the <em>results</em> directory.
